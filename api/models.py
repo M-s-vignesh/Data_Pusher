@@ -56,3 +56,34 @@ class Role(models.Model):
 
     def __str__(self):
         return self.role_name
+    
+
+class AccountMember(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, db_index=True)  
+    user = models.ForeignKey(User, on_delete=models.PROTECT, db_index=True)  
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, db_index=True)  
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)  
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="created_members", db_index=True)
+    updated_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="updated_members",null=True,blank=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["account", "user"]),  
+            models.Index(fields=["created_at"]),  
+        ]
+        unique_together = ("account", "user")  
+
+    def __str__(self):
+        return f"{self.user} - {self.role} in {self.account}"
+    
+    def save(self, *args, **kwargs):
+        request_user = kwargs.pop("request_user", None)
+            
+        if not self.pk and not self.created_by: 
+            self.created_by = request_user
+
+        if self.pk and request_user:  
+            self.updated_by = request_user
+
+        super().save(*args, **kwargs)

@@ -11,7 +11,7 @@ from django.core.cache import cache
 
 User = get_user_model()
 
-def create_user(email='test@example.com',
+def create_user(email='testuser@example.com',
                 password='pass13',
                 created_by=None):
         """Function to create normal user"""

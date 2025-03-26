@@ -12,12 +12,12 @@ from django.http import HttpResponse
 from django.conf import settings
 from drf_spectacular.views import SpectacularSwaggerView
 from django.views.generic import TemplateView
-from .views import AccountViewset
+from .views import AccountViewset,AccountMemberViewset
     
 router = routers.DefaultRouter()
 router.register(r'users',UserListView, basename='user')
 router.register(r'accounts', AccountViewset, basename='account')
-
+router.register(r'account_members', AccountMemberViewset, basename='account_member')
     
 urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

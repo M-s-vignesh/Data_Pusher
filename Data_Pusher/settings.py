@@ -116,11 +116,15 @@ SPECTACULAR_SETTINGS = {
         'displayRequestDuration': True,
     },
     "PERSIST_AUTH" : False,
-    
-    
+      
 }
 
-
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # Use Redis for production
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
