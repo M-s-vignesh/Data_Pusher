@@ -1,8 +1,22 @@
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import URLValidator
+import uuid
 
 User = get_user_model()
+
+HTTP_METHODS = [
+    ("GET", "GET"),
+    ("POST", "POST"),
+    ("PUT", "PUT"),
+    ("DELETE", "DELETE"),
+]
+
+STATUS_CHOICES = [
+    ("success", "Success"),
+    ("failed", "Failed"),
+]
 
 # Create your models here
 
@@ -87,3 +101,40 @@ class AccountMember(models.Model):
             self.updated_by = request_user
 
         super().save(*args, **kwargs)
+
+
+class Destination(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='destinations')
+    url = models.URLField(validators=[URLValidator()], unique=True)
+    http_method = models.CharField(max_length=10, choices=HTTP_METHODS)
+    headers = models.JSONField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_destinations')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='updated_destinations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.account} - {self.url}"
+    
+    def save(self, *args, **kwargs):
+        request_user = kwargs.pop("request_user", None)
+            
+        if not self.pk and not self.created_by: 
+            self.created_by = request_user
+
+        if self.pk and request_user:  
+            self.updated_by = request_user
+
+        super().save(*args, **kwargs)
+
+class Log(models.Model):
+    event_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='logs')
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='logs')
+    received_timestamp = models.DateTimeField(auto_now_add=True)
+    processed_timestamp = models.DateTimeField(null=True, blank=True)
+    received_data = models.JSONField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+
+    def __str__(self):
+        return f"Event {self.event_id} - Status {self.status}"

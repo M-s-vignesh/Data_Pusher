@@ -12,13 +12,19 @@ from django.http import HttpResponse
 from django.conf import settings
 from drf_spectacular.views import SpectacularSwaggerView
 from django.views.generic import TemplateView
-from .views import AccountViewset,AccountMemberViewset
+from .views import (AccountViewset,
+                    AccountMemberViewset,
+                    DestinationViewSet,
+                    LogViewSet,
+                    IncomingDataHandlerViewSet)
     
 router = routers.DefaultRouter()
 router.register(r'users',UserListView, basename='user')
 router.register(r'accounts', AccountViewset, basename='account')
 router.register(r'account_members', AccountMemberViewset, basename='account_member')
-    
+router.register(r"destinations", DestinationViewSet, basename="destination")
+router.register(r"logs", LogViewSet, basename="logs")
+
 urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
 
@@ -31,4 +37,6 @@ urlpatterns = [
      path('swagger/',  SpectacularSwaggerView.as_view(url_name="schema"), name='swagger-ui'),
 
     path('logout/', LogoutView.as_view(), name='logout'),
+
+    path("server/incoming_data/", IncomingDataHandlerViewSet.as_view({"post": "incoming_data"})),
 ]   

@@ -126,6 +126,10 @@ CACHES = {
     }
 }
 
+CELERY_BROKER_URL = "redis://localhost:6379/0"  # Use Redis as the message broker
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",       
@@ -135,7 +139,12 @@ REST_FRAMEWORK = {
         'Users.permissions.AllowFirstUserWithoutAuth',
     ],
     'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema',
-    
+    'DEFAULT_THROTTLE_CLASSES': [
+        'api.throttling.AuthenticatedUserThrottle',  # Add custom throttle here
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '5/s',  # Apply throttle rate for authenticated users (5 requests per second)
+    },
 }
 
 
